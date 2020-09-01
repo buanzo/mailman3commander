@@ -1,0 +1,4 @@
+tqdm
+simple_term_menu
+buanzobasics
+mailmanclient
