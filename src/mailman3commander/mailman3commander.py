@@ -11,13 +11,12 @@ __author__ = 'Buanzo <buanzo@buanzo.com.ar> https://github.com/buanzo'
 
 import sys
 import time
-import tqdm
 import argparse
 import configparser
 from mailmanclient import Client
 from simple_term_menu import TerminalMenu
 from pprint import pprint
-from buanzobasics.buanzobasics import printerr, pprinterr
+from buanzobasics.buanzobasics import printerr, pprinterr, valueOrDefault
 
 
 class Mailman3Commander():
@@ -90,29 +89,63 @@ class Mailman3Commander():
             return(None)
         return(items[ret])
 
-    def view_mm3_config(self):
-        title = "---[ MM3 Configuration Browser @ Mailman 3 Commander ]----------------\n"
-        cursor = "> "
-        cursor_style = ("fg_blue", "bold")
-        menu_style = ("bg_blue", "fg_yellow")
+    def build_menu(self, args, items):
+        # This function creates a menu.
+        # Parameters:
+        # args: dict with title and optionally cursor, cursor_style, menu_style
+        # itemFunc: a function that populates the menu items
+        # example call:
+        #
+        # sel = self.build_menu({'title': 'Numbers from 1 to 10'}, range(10))
+        #
+        # Returns:
+        # (item_number, item_text)
+        title = args['title']
+        cursor = valueOrDefault(args, 'cursor', "> ")
+        cursor_style = valueOrDefault(args, 'cursor_style', ("fg_blue", "bold"))
+        menu_style = valueOrDefault(args, 'menu_style', ("bg_blue", "fg_yellow"))
+        cycle_cursor = valueOrDefault(args, 'cycle_cursor', True)
+        clear_screen = valueOrDefault(args, 'clear_screen', True)
         menu_exit = False
+        while not menu_exit:
+            mb = TerminalMenu(menu_entries=items,
+                              title=title,
+                              menu_cursor=cursor,
+                              menu_cursor_style=cursor_style,
+                              menu_highlight_style=menu_style,
+                              cycle_cursor=cycle_cursor,
+                              clear_screen=clear_screen)
+            ret = mb.show()
+            if ret is None:
+                return((None,None))
+            else:
+                return((ret,items[ret]))
+
+    def get_mm3config_section(self,mainkey):
+        items = []
+        for key in sorted(self.mmclient.configuration[mainkey]):
+            items.append('  {}: {}'.format(key, self.mmclient.configuration[mainkey][key]).replace('\n','\\n'))
+        return(items)
+        
+    def get_mm3config_items(self):
         items = []
         for mainkey in sorted(self.mmclient.configuration):
-            items.append('- [ {} ]'.format(mainkey))
-            # print('- [ {} ]'.format(mainkey))
-            for key in sorted(self.mmclient.configuration[mainkey]):
-                items.append('  {}: {}'.format(key, self.mmclient.configuration[mainkey][key]).replace('\n','\\n'))
-                # print('  {}: {}'.format(key,self.mmclient.configuration[mainkey][key]))
+            items.append(mainkey)
+        return(items)
+
+    def view_mm3_config(self):
+        args = {}
+        args['cycle_cursor'] = False
+        args['title'] = """
+\033[1;37;44m---[ Global Configuration Browser @ Mailman 3 Commander ]----------------\033[0;39;49m\n
+Choose a section from the menu, or hit ESC to go back:
+"""
+        menu_exit = False
         while not menu_exit:
-            main_menu = TerminalMenu(menu_entries=items,
-                                     title=title,
-                                     menu_cursor=cursor,
-                                     menu_cursor_style=cursor_style,
-                                     menu_highlight_style=menu_style,
-                                     cycle_cursor=False,
-                                     clear_screen=True)
-            ret = main_menu.show()
-            if ret is None:
+            v,n = self.build_menu(args, self.get_mm3config_items())
+            if v is not None and v >= 0:
+                a = self.build_menu(args, self.get_mm3config_section(n))
+            elif v is None:
                 menu_exit = True
 
     def main_loop(self):
@@ -122,8 +155,7 @@ class Mailman3Commander():
         # General description:
         # Choose a mailing list -> Membership management, Approve/defer/etc messages, list configuration
         # Browser Mailman3 configuration (no changes allowed)
-        main_menu_exit = False
-        while not main_menu_exit:
+        while True:
             msel = self.main_menu()
             if msel == self.MMI_STR_QUIT or msel is None:
                 sys.exit(0)
