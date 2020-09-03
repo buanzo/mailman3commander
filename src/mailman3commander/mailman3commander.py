@@ -148,6 +148,47 @@ Choose a section from the menu, or hit ESC to go back:
             elif v is None:
                 menu_exit = True
 
+    def list_configuration_menu(self, lista):
+        args = {}
+        args['cycle_cursor'] = False
+        args['title'] = """
+\033[1;37;44m---[ {} Settings @ Mailman 3 Commander ]----------------\033[0;39;49m\n
+Choose a setting to change.
+Be advised: newlines below are filtered to avoid menu issues:
+""".format(lista)
+        mmlist = self.mmclient.get_list(lista)
+        items = []
+        for key in sorted(mmlist.settings):
+            items.append('  {}: {}'.format(key, mmlist.settings[key]))
+        menu_exit = False
+        while not menu_exit:
+            v,n = self.build_menu(args, items)
+            if v is not None and v >= 0:
+                self.list_setting_menu(lista, items[v])
+            elif v is None:
+                menu_exit = True
+        
+    def manage_list_menu(self, lista):
+        args = {}
+        args['title'] = """
+\033[1;37;44m---[ {} Management @ Mailman 3 Commander ]----------------\033[0;39;49m\n
+Choose a section from the menu, or hit ESC to go back:
+""".format(lista)
+        items = ['List Configuration', 'Membership Management', 'Moderation Tasks', 'Delete List']
+        menu_exit = False
+        while not menu_exit:
+            v,n = self.build_menu(args, items)
+            if v is not None and items[v] == 'List Configuration':
+                self.list_configuration_menu(lista)
+            elif v is not None and items[v] == 'Membership Management':
+                self.membership_management_menu(lista)
+            elif v is not None and items[v] == 'Moderation Tasks':
+                self.moderation_menu(lista)
+            elif v is not None and items[v] == 'Delete List':
+                self.delete_list_menu(lista)
+            elif v is None:
+                menu_exit = True
+
     def main_loop(self):
         # The main loop presents the main menu and handles exiting.
         # https://docs.mailman3.org/projects/mailmanclient/en/latest/src/mailmanclient/docs/using.html
@@ -162,8 +203,7 @@ Choose a section from the menu, or hit ESC to go back:
             elif msel == self.MMI_STR_VIEW_GLOBAL_CONF:
                 self.view_mm3_config()
             elif msel.startswith('Manage '):
-                print('will {}'.format(msel))
-                time.sleep(5)
+                self.manage_list_menu(msel.split('Manage ')[1])
             else:
                 print('Unknown option')
                 time.sleep(5)
