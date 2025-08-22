@@ -2,18 +2,40 @@
 
 # Mailman3 Commander
 
-m3c is a simple console tool which helps you manage your Mailman3 setup. The tool is self-explanatory, just run m3c.
+m3c is a simple console tool which helps you manage your Mailman3 setup. The tool is self-explanatory—just run `m3c`.
 
-# Installation
+## Installation
 
-Just run:
+Once published to PyPI you will be able to install the package with:
 
-    pip3 install midnight3commander
+```bash
+pip install mailman3commander
+```
 
-And you are done. (well, no, not really, we still need to release on pypi, so you will have
-to git clone the repo, pip3 install -r requirements.txt, then switch to src/mailman3commander
-and python3 mailman3commander.py)
+### Local setup
 
+Until then you can run the project from source:
+
+
+1. Clone the repository and move into it:
+
+   ```bash
+   git clone https://github.com/buanzo/mailman3commander.git
+   cd mailman3commander
+   ```
+
+2. Install the dependencies and the package in editable mode:
+
+   ```bash
+   pip install -r requirements.txt
+   pip install -e .
+   ```
+
+3. Invoke the console script:
+
+   ```bash
+   m3c
+   ```
 
 # Libraries in use
 
@@ -21,7 +43,8 @@ and python3 mailman3commander.py)
 - [buanzobasics](https://pypi.org/project/buanzobasics/)
 - [mailmanclient](https://pypi.org/project/mailmanclient/)
 
-# Libraries I would like to use:
+
+## Libraries I would like to use:
 https://pypi.org/project/easy-ansi/
 https://pypi.org/project/blessed/
 https://github.com/bchao1/bullet
