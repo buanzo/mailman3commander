@@ -192,15 +192,19 @@ class Mailman3Commander():
 """.format(lista, _T('Membership'))
         mmlist = self.mmclient.get_list(lista)
         items = [_T('Add Member'), '-------------------------']
+        member_addresses = []
         for member in mmlist.members:
-            items.append('{} {}'.format(_T('Manage'),member.address))
+            items.append('{} {}'.format(_T('Manage'), member.address))
+            member_addresses.append(member.address)
         menu_exit = False
         while not menu_exit:
             v,n = self.build_menu(args, items)
             if v is not None and v == 0: # Top option
                 self.add_member_menu(lista)
             elif v is not None and v > 1: # avoid separator
-                self.list_member_menu(lista, items[v])
+                idx = v - 2
+                if idx < len(member_addresses):
+                    self.list_member_menu(lista, member_addresses[idx])
             elif v is None:
                 menu_exit = True
 
@@ -214,15 +218,95 @@ Be advised: newlines below are filtered to avoid menu issues:
 """.format(lista, _T('Settings'))
         mmlist = self.mmclient.get_list(lista)
         items = []
+        keys = []
         for key in sorted(mmlist.settings):
             items.append('  {}: {}'.format(key, mmlist.settings[key]))
+            keys.append(key)
         menu_exit = False
         while not menu_exit:
             v,n = self.build_menu(args, items)
-            if v is not None and v >= 0:
-                self.list_setting_menu(lista, items[v])
+            if v is not None and v >= 0 and v < len(keys):
+                self.list_setting_menu(lista, keys[v])
             elif v is None:
                 menu_exit = True
+
+    def add_member_menu(self, lista):
+        """Subscribe a new member to the list."""
+        mmlist = self.mmclient.get_list(lista)
+        email = input(_T('Enter the email address to subscribe: ')).strip()
+        if email == '':
+            return
+        try:
+            # Use email for both email and display name and pre-approve
+            mmlist.subscribe(email, email, pre_verified=True, pre_confirmed=True, pre_approved=True)
+            print(_T('Member {} added to {}').format(email, lista))
+        except Exception as exc:
+            printerr(_T('Error subscribing {}: {}').format(email, exc))
+        input(_T('Press Enter to continue'))
+
+    def list_member_menu(self, lista, address):
+        """Manage an existing member of a list."""
+        args = {}
+        args['title'] = """\033[1;37;44m---[ {} {} @ Mailman 3 Commander ]----------------\033[0;39;49m\n""".format(address, _T('Member'))
+        args['cycle_cursor'] = False
+        items = [_T('Remove from list')]
+        v,n = self.build_menu(args, items)
+        if v is not None and items[v] == _T('Remove from list'):
+            confirm = input(_T('Type "yes" to confirm removal of {}: ').format(address))
+            if confirm.lower().startswith('y'):
+                try:
+                    mmlist = self.mmclient.get_list(lista)
+                    mmlist.unsubscribe(address)
+                    print(_T('{} removed').format(address))
+                except Exception as exc:
+                    printerr(_T('Error removing {}: {}').format(address, exc))
+                input(_T('Press Enter to continue'))
+
+    def list_setting_menu(self, lista, key):
+        """Edit a single list setting."""
+        mmlist = self.mmclient.get_list(lista)
+        current = mmlist.settings.get(key)
+        prompt = _T('New value for {k} (current: {c}): ').format(k=key, c=current)
+        newval = input(prompt)
+        if newval == '':
+            return
+        # Attempt to convert to proper type (bool/int/float) when possible
+        converted = newval
+        if isinstance(current, bool):
+            converted = newval.lower() in ['1', 'true', 'yes', 'on']
+        else:
+            try:
+                if isinstance(current, int):
+                    converted = int(newval)
+                elif isinstance(current, float):
+                    converted = float(newval)
+            except ValueError:
+                converted = newval
+        try:
+            mmlist.settings[key] = converted
+            mmlist.settings.save()
+            print(_T('Setting updated'))
+        except Exception as exc:
+            printerr(_T('Error updating setting: {}').format(exc))
+        input(_T('Press Enter to continue'))
+
+    def delete_list_menu(self, lista):
+        """Delete a mailing list after confirmation."""
+        args = {}
+        args['cycle_cursor'] = False
+        args['title'] = """\033[1;37;44m---[ {} {} @ Mailman 3 Commander ]----------------\033[0;39;49m\n{}""".format(lista, _T('Deletion'), _T('Are you sure?'))
+        items = [_T('No'), _T('Yes, delete')]
+        v,n = self.build_menu(args, items)
+        if v is not None and items[v] == _T('Yes, delete'):
+            confirm = input(_T('Type the list name ({}) to confirm: ').format(lista))
+            if confirm == lista:
+                try:
+                    mmlist = self.mmclient.get_list(lista)
+                    mmlist.delete()
+                    print(_T('List {} deleted').format(lista))
+                except Exception as exc:
+                    printerr(_T('Error deleting list: {}').format(exc))
+                input(_T('Press Enter to continue'))
         
     def get_held_items(self, lista):
         # TODO: make column width adjust to screen width
