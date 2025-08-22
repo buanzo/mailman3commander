@@ -64,10 +64,11 @@ class Mailman3Commander():
         url = '{schema}://{host}:{port}'.format(schema=s, host=host, port=port)
 
         # And test it using the credentials:
+        api_url = f"{url}/3.1"
         try:
-            client = Client('http://localhost:8001/3.1', user, pw)
+            client = Client(api_url, user, pw)
         except Exception as exc:
-            printerr(_T('Exception accesing REST API URL = {}').format(url))
+            printerr(_T('Exception accessing REST API URL = {}').format(api_url))
             printerr(exc)
             return(False)
         if 'api_version' in client.system.keys():
