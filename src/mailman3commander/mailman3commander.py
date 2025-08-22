@@ -6,7 +6,7 @@
 # Author: Arturo 'Buanzo' Busleiman <buanzo@buanzo.com.ar>
 #
 
-__version__ = '0.1.1'
+from . import __version__
 __author__ = 'Buanzo <buanzo@buanzo.com.ar> https://github.com/buanzo'
 
 import sys

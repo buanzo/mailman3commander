@@ -24,10 +24,9 @@ Until then you can run the project from source:
    cd mailman3commander
    ```
 
-2. Install the dependencies and the package in editable mode:
+2. Install the package in editable mode (this will install dependencies automatically):
 
    ```bash
-   pip install -r requirements.txt
    pip install -e .
    ```
 
@@ -36,6 +35,15 @@ Until then you can run the project from source:
    ```bash
    m3c
    ```
+
+### Build
+
+To build a distribution package locally, install the build tool and run:
+
+```bash
+python -m pip install --upgrade build
+python -m build
+```
 
 # Libraries in use
 
