@@ -16,6 +16,7 @@ pip install mailman3commander
 
 Until then you can run the project from source:
 
+
 1. Clone the repository and move into it:
 
    ```bash
@@ -36,9 +37,12 @@ Until then you can run the project from source:
    m3c
    ```
 
-## Libraries in use
-https://pypi.org/project/simple-term-menu/
-https://pypi.org/project/mailmanclient/
+# Libraries in use
+
+- [simple-term-menu](https://pypi.org/project/simple-term-menu/)
+- [buanzobasics](https://pypi.org/project/buanzobasics/)
+- [mailmanclient](https://pypi.org/project/mailmanclient/)
+
 
 ## Libraries I would like to use:
 https://pypi.org/project/easy-ansi/
