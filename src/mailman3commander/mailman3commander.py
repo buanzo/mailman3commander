@@ -13,6 +13,7 @@ import sys
 import time
 import argparse
 import configparser
+import shutil
 from mailmanclient import Client
 from simple_term_menu import TerminalMenu
 from buanzobasics.buanzobasics import printerr, pprinterr, valueOrDefault
@@ -309,12 +310,12 @@ Be advised: newlines below are filtered to avoid menu issues:
                 input(_T('Press Enter to continue'))
         
     def get_held_items(self, lista):
-        # TODO: make column width adjust to screen width
-        item_f = '{request_id:<5d} - {sender:<{avs1}s} - {subject:>{avs2}s}|{data}'.format
+        item_f = '{request_id:<5d} - {sender:<{avs1}} - {subject:>{avs2}}|{data}'.format
         mmlist = self.mmclient.get_list(lista)
         retObj = []
-        avs = int((self.built_menu._num_cols() - 11) / 2)
-        avs1 = avs * 0.66
+        term_cols = shutil.get_terminal_size(fallback=(80, 20)).columns
+        avs = max(int((term_cols - 11) / 2), 0)
+        avs1 = int(avs * 0.66)
         avs2 = avs - avs1
         for item in mmlist.held:
             rid = item._get('request_id')
