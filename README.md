@@ -16,8 +16,10 @@ and python3 mailman3commander.py)
 
 
 # Libraries in use
-https://pypi.org/project/simple-term-menu/
-https://pypi.org/project/mailmanclient/
+
+- [simple-term-menu](https://pypi.org/project/simple-term-menu/)
+- [buanzobasics](https://pypi.org/project/buanzobasics/)
+- [mailmanclient](https://pypi.org/project/mailmanclient/)
 
 # Libraries I would like to use:
 https://pypi.org/project/easy-ansi/
