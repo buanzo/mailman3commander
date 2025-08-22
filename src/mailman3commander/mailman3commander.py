@@ -13,10 +13,11 @@ import sys
 import time
 import argparse
 import configparser
+import logging
 import shutil
 from mailmanclient import Client
 from simple_term_menu import TerminalMenu
-from buanzobasics.buanzobasics import printerr, pprinterr, valueOrDefault
+from buanzobasics.buanzobasics import valueOrDefault
 from email import policy
 from email.parser import BytesParser
 
@@ -43,13 +44,12 @@ class Mailman3Commander():
         try:
             config.read(self.configpath)
         except Exception as exc:
-            printerr(_T('Exception reading {}').format(self.configpath))
-            printerr(exc)
+            logging.error(_T('Exception reading {}: {}').format(self.configpath, exc))
             return(False)
 
         if 'webservice' not in config:
-            printerr(_T('No webservice section found: {}').format(self.configpath))
-            printerr(_T('Are you sure this is the correct path?'))
+            logging.error(_T('No webservice section found: {}').format(self.configpath))
+            logging.error(_T('Are you sure this is the correct path?'))
             return(False)
 
         # Get parameters for Mailman3 REST API URL:
@@ -69,8 +69,7 @@ class Mailman3Commander():
         try:
             client = Client(api_url, user, pw)
         except Exception as exc:
-            printerr(_T('Exception accessing REST API URL = {}').format(api_url))
-            printerr(exc)
+            logging.error(_T('Exception accessing REST API URL = {}: {}').format(api_url, exc))
             return(False)
         if 'api_version' in client.system.keys():
             self.mmclient = client
@@ -242,7 +241,7 @@ Be advised: newlines below are filtered to avoid menu issues:
             mmlist.subscribe(email, email, pre_verified=True, pre_confirmed=True, pre_approved=True)
             print(_T('Member {} added to {}').format(email, lista))
         except Exception as exc:
-            printerr(_T('Error subscribing {}: {}').format(email, exc))
+            logging.error(_T('Error subscribing {}: {}').format(email, exc))
         input(_T('Press Enter to continue'))
 
     def list_member_menu(self, lista, address):
@@ -260,7 +259,7 @@ Be advised: newlines below are filtered to avoid menu issues:
                     mmlist.unsubscribe(address)
                     print(_T('{} removed').format(address))
                 except Exception as exc:
-                    printerr(_T('Error removing {}: {}').format(address, exc))
+                    logging.error(_T('Error removing {}: {}').format(address, exc))
                 input(_T('Press Enter to continue'))
 
     def list_setting_menu(self, lista, key):
@@ -288,7 +287,7 @@ Be advised: newlines below are filtered to avoid menu issues:
             mmlist.settings.save()
             print(_T('Setting updated'))
         except Exception as exc:
-            printerr(_T('Error updating setting: {}').format(exc))
+            logging.error(_T('Error updating setting: {}').format(exc))
         input(_T('Press Enter to continue'))
 
     def delete_list_menu(self, lista):
@@ -306,7 +305,7 @@ Be advised: newlines below are filtered to avoid menu issues:
                     mmlist.delete()
                     print(_T('List {} deleted').format(lista))
                 except Exception as exc:
-                    printerr(_T('Error deleting list: {}').format(exc))
+                    logging.error(_T('Error deleting list: {}').format(exc))
                 input(_T('Press Enter to continue'))
         
     def get_held_items(self, lista):
@@ -434,6 +433,7 @@ Choose a section from the menu, or hit ESC to go back:
 
 
 def run():
+    logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser()
     parser.add_argument('--version',
                         action='version',
