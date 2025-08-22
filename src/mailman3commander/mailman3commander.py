@@ -15,15 +15,23 @@ import argparse
 import configparser
 import logging
 import shutil
+import os
+import gettext
 from mailmanclient import Client
 from simple_term_menu import TerminalMenu
 from buanzobasics.buanzobasics import valueOrDefault
 from email import policy
 from email.parser import BytesParser
 
-def _T(msgid):
-    # Proxy for i18n
-    return(msgid)
+
+LOCALE_DIR = os.path.join(os.path.dirname(__file__), 'locale')
+translation = gettext.translation('mailman3commander', localedir=LOCALE_DIR, fallback=True)
+_ = translation.gettext
+
+
+def _T(msgid: str) -> str:
+    """Translate *msgid* using the active gettext catalog."""
+    return _(msgid)
 
 class Mailman3Commander():
     def __init__(self, configpath):

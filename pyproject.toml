@@ -40,9 +40,13 @@ m3c = "mailman3commander.mailman3commander:run"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
+include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"mailman3commander" = ["locale/mailman3commander.pot", "locale/*/LC_MESSAGES/*.po"]
 
 [tool.setuptools.dynamic]
 version = {attr = "mailman3commander.__version__"}
