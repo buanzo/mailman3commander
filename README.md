@@ -32,9 +32,36 @@ Until then you can run the project from source:
 
 3. Invoke the console script:
 
-   ```bash
-   m3c
-   ```
+```bash
+m3c
+```
+
+## Docker helper functions
+
+Some administrative tasks are easier to perform through the classic Mailman
+CLI.  The module :mod:`mailman3commander.docker_mailman` provides thin wrappers
+around ``docker compose exec -T mailman-core`` so these commands can be
+invoked from Python:
+
+```python
+from mailman3commander import list_lists, list_members, add_members
+
+stdout, stderr, rc = list_lists()
+print(stdout)
+```
+
+The helpers expose ``list_members`` and ``add_members`` as well, all returning a
+``(stdout, stderr, returncode)`` tuple for further processing.
+
+## Reconnecting after ``setup.sh``
+
+When the ``setup.sh`` script that bootstraps the Mailman stack exits the
+services remain running in the background.  Use the script in
+``examples/manager_reconnect.sh`` to reattach and launch the commander menu:
+
+```bash
+./examples/manager_reconnect.sh
+```
 
 ### Build
 
