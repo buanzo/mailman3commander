@@ -45,6 +45,32 @@ python -m pip install --upgrade build
 python -m build
 ```
 
+# Translations
+
+`mailman3commander` uses [gettext](https://docs.python.org/3/library/gettext.html)
+for internationalization. Message catalogs live under
+`src/mailman3commander/locale`.
+
+To update the template file run:
+
+```bash
+xgettext -k_T -o src/mailman3commander/locale/mailman3commander.pot src/mailman3commander/mailman3commander.py
+```
+
+To start a new translation copy the template and edit the resulting `.po`
+file:
+
+```bash
+cp src/mailman3commander/locale/mailman3commander.pot src/mailman3commander/locale/<lang>/LC_MESSAGES/mailman3commander.po
+```
+
+Finally compile the catalog to a binary `.mo` file so it can be used at
+runtime:
+
+```bash
+msgfmt src/mailman3commander/locale/<lang>/LC_MESSAGES/mailman3commander.po -o src/mailman3commander/locale/<lang>/LC_MESSAGES/mailman3commander.mo
+```
+
 # Libraries in use
 
 - [simple-term-menu](https://pypi.org/project/simple-term-menu/)
